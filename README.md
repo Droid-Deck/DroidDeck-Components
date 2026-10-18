@@ -40,12 +40,14 @@ LGPL-2.1-or-later.
 DroidDeck reads its package catalogs from this repository's `main`: `components.json` (Windows
 components), `desktop.json` (desktop and emulator packages), `linuxfs.json` (the Linux runtime) and
 `steam-seed.json` (the Steam seed). `fex.json` records the FEX build the optional x86-64 Steam client
-downloads and `fex-rootfs.json` the x86-64 system it runs in (FEX-Emu's Ubuntu 24.04 rootfs);
-`droiddeck-steam-x64` in the app pins the same sha256s. Every file they point at lives on a
+installs (the app follows it) and `fex-rootfs.json` the x86-64 system it runs in (FEX-Emu's Ubuntu 24.04
+rootfs, whose sha256 `droiddeck-steam-x64` pins). Every file they point at lives on a
 release here, produced by a workflow in `.github/workflows/`:
 `mirror-release.yml` brings an existing release in with every
 asset checked against the catalog (and leaves `SHA256SUMS` + `MIRROR.md` naming the run),
 `mirror-upstream.yml` does the same for a file its upstream publishes outside GitHub,
+`build-fex.yml` builds FEX from DroidDeck's `tools/fex` and replaces it on the single `fex` release before
+recording the new version in `fex.json`,
 `component-snapshots.yml` records what a Windows component's installer leaves behind,
 `build-desktop.yml`, `build-emulator-source.yml`, `mirror-appimages.yml` and `build-linuxfs.yml`
 build the rest. Nothing on a release is uploaded by hand.

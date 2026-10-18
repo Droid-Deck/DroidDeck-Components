@@ -1,0 +1,115 @@
+name: Build FEX for the x86-64 Steam client
+
+# Builds tools/fex of Droid-Deck/DroidDeck at the given ref (host thunks on) in Arch Linux ARM, replaces
+# fex.tzst on the single `fex` release, confirms the digest GitHub stored, and only then records the build
+# in fex.json, which the app follows: a device that reads the old fex.json meanwhile gets an archive that
+# does not match and keeps its FEX. Nothing is uploaded by hand.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version recorded in fex.json, e.g. 2610-r6 (the FEX release, then a build number that only grows)'
+        required: true
+      ref:
+        description: 'Droid-Deck/DroidDeck branch, tag or commit whose tools/fex is built'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-fex
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    outputs:
+      commit: ${{ steps.source.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Droid-Deck/DroidDeck
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+          sparse-checkout: tools/fex
+      - id: source
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Build in Arch Linux ARM
+        run: |
+          set -euo pipefail
+          docker run --rm -e FEX_THUNKS=1 -v "$PWD:/work" -w /work menci/archlinuxarm:base-devel bash tools/fex/build-in-arch.sh
+          sudo chown -R "$(id -u):$(id -g)" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fex
+          path: |
+            fex.tzst
+            fex-needed.txt
+            fex-files.txt
+
+  # Only this job can write: the build above runs third-party images and toolchains with a read-only token.
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: fex
+          path: out
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ inputs.version }}
+          COMMIT: ${{ needs.build.outputs.commit }}
+        run: |
+          set -euo pipefail
+          echo "$VERSION" | grep -Eqx '[0-9]+-r[0-9]+' || { echo "::error::version must look like 2610-r6"; exit 1; }
+          current=$(python3 -c "import json; print(json.load(open('fex.json')).get('version', ''))")
+          if [ "$current" = "$VERSION" ]; then
+            echo "::error::fex.json already records $VERSION; a new build takes a new version"
+            exit 1
+          fi
+          sha=$(sha256sum out/fex.tzst | cut -d' ' -f1)
+          size=$(stat -c %s out/fex.tzst)
+          run="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if ! gh release view fex >/dev/null 2>&1; then
+            gh release create fex --latest=false --prerelease=false --title "FEX for the x86-64 Steam client" \
+              --notes "Replaced by build-fex.yml with each build; fex.json records the current one."
+          fi
+          gh release upload fex out/fex.tzst --clobber
+          stored=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/fex" --jq '.assets[] | select(.name == "fex.tzst") | .digest')
+          [ "$stored" = "sha256:$sha" ] || { echo "::error::GitHub stored fex.tzst as $stored, not sha256:$sha"; exit 1; }
+          gh release edit fex --latest=false --prerelease=false \
+            --notes "FEX $VERSION: tools/fex of Droid-Deck/DroidDeck $COMMIT, built by $run. sha256 $sha, $size bytes. Replaced by build-fex.yml with each build; fex.json records the current one."
+          python3 - "$VERSION" "$sha" "$size" "$COMMIT" <<'PY'
+          import json, sys
+          version, sha, size, commit = sys.argv[1:5]
+          d = json.load(open("fex.json"))
+          d.update({
+              "release": "fex",
+              "version": version,
+              "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/fex/fex.tzst",
+              "sha256": sha,
+              "size": int(size),
+              "file_size": int(size),
+              "note": "FEX built for the Linux runtime from tools/fex of Droid-Deck/DroidDeck %s by build-fex.yml (host thunks, "
+                      "libraries the runtime lacks bundled). The app reads this file and installs the build only once its "
+                      "archive matches this sha256 and its programs load; the archive on the fex release is replaced with "
+                      "each build." % commit,
+          })
+          open("fex.json", "w").write(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fex.json
+          git commit -m "FEX $VERSION for the x86-64 Steam client" -m "tools/fex of Droid-Deck/DroidDeck $COMMIT, built by $run."
+          git pull --rebase --quiet origin main
+          git push origin HEAD:main
