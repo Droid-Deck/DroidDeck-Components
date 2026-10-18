@@ -73,7 +73,7 @@ jobs:
           steamdeck-desktop-r1|desktop.json|Desktop and emulator packages
           linuxfs-r9|linuxfs.json|Linux runtime r9
           steam-proton-arm64-25502785|steam-seed.json|Steam seed: Proton Experimental (ARM64) 25502785
-          fex-2610-r4|fex.json|FEX 2610 r4 for the x86-64 Steam client
+          fex-2610-r5|fex.json|FEX 2610 r5 for the x86-64 Steam client
           LIST
           )
           fi
