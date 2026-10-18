@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "category": "fex-rootfs",
+  "release": "fex-rootfs-ubuntu-24.04-2026-08-11",
+  "name": "x86-64 system for the x86-64 Steam client (Ubuntu 24.04)",
+  "version": "ubuntu-24.04-2026-08-11",
+  "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/fex-rootfs-ubuntu-24.04-2026-08-11/Ubuntu_24_04.sqsh",
+  "upstream": "https://rootfs.fex-emu.gg/Ubuntu_24_04/2026-08-11/Ubuntu_24_04.sqsh",
+  "sha256": "2854b06d3ff1b8f6e526135bfb6dd5b7b30ab3ab73e79ae933a3d9fed959a178",
+  "size": 525615104,
+  "file_size": 525615104,
+  "note": "FEX-Emu's Ubuntu 24.04 x86-64 rootfs (SquashFS, 2026-08-11), unmodified. droiddeck-steam-x64 downloads it once for the optional x86-64 Steam client, unpacks it as that client's own x86-64 system and pins this sha256. Fetched from rootfs.fex-emu.gg by mirror-upstream.yml."
+}

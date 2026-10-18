@@ -1,0 +1,88 @@
+name: Mirror an upstream file
+
+# Brings a file its upstream publishes outside GitHub into a release here, for a single-package
+# catalog that names it: the catalog's "upstream" link is fetched, checked against the sha256 and
+# size the catalog promises (tools/mirror/expectations.py), uploaded under the catalog's release,
+# and its sha256 confirmed against what GitHub stored. A SHA256SUMS and a MIRROR.md naming this run
+# go with it. Nothing is uploaded by hand.
+
+on:
+  workflow_dispatch:
+    inputs:
+      catalog:
+        description: 'Single-package catalog naming the release, the file and its upstream link'
+        required: true
+        default: 'fex-rootfs.json'
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Mirror
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CATALOG: ${{ inputs.catalog }}
+        run: |
+          set -euo pipefail
+          case "$CATALOG" in ""|*[!a-z0-9.-]*|.*) echo "::error::catalog must be a file name in this repository"; exit 1 ;; esac
+          [ -f "$CATALOG" ] || { echo "::error::$CATALOG not found"; exit 1; }
+          tag=$(jq -r '.release // empty' "$CATALOG")
+          url=$(jq -r '.url // empty' "$CATALOG")
+          upstream=$(jq -r '.upstream // empty' "$CATALOG")
+          title=$(jq -r '.name // empty' "$CATALOG")
+          [ -n "$tag" ] && [ -n "$upstream" ] || { echo "::error::$CATALOG names no release or no upstream link"; exit 1; }
+          case "$url" in
+            "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/$tag/"*) ;;
+            *) echo "::error::$CATALOG's url is not on this repository's $tag release"; exit 1 ;;
+          esac
+          name=${url##*/}
+          work=$(mktemp -d)
+          python3 tools/mirror/expectations.py "$tag" "$CATALOG" > "$work/expect.json"
+          sha=$(jq -r --arg n "$name" '.[$n][0].sha256 // empty' "$work/expect.json")
+          size=$(jq -r --arg n "$name" '.[$n][0].size // empty' "$work/expect.json")
+          [ ${#sha} -eq 64 ] && [ -n "$size" ] || { echo "::error::$CATALOG gives $name no sha256 and size"; exit 1; }
+
+          stored() {
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" --jq '.assets[] | "\(.name) \(.digest // "")"' 2>/dev/null |
+              awk -v n="$name" '$1==n{print $2}'
+          }
+          if [ "$(stored)" = "sha256:$sha" ]; then
+            echo "$name is already on $tag with the catalog's sha256; nothing to do"
+            exit 0
+          fi
+
+          curl -fL --retry 3 --retry-delay 15 --max-time 3000 -o "$work/$name" "$upstream"
+          got_sha=$(sha256sum "$work/$name" | cut -d' ' -f1)
+          got_size=$(stat -c %s "$work/$name")
+          if [ "$got_sha" != "$sha" ] || [ "$got_size" != "$size" ]; then
+            echo "::error::$upstream is $got_size bytes, sha256 $got_sha; $CATALOG promises $size bytes, sha256 $sha"
+            exit 1
+          fi
+
+          (cd "$work" && sha256sum "$name" > SHA256SUMS)
+          {
+            echo "# Mirror of $upstream"
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "Verified against: $CATALOG"
+            echo
+            echo "| asset | size | catalog check | origin |"
+            echo "|---|---|---|---|"
+            echo "| $name | $got_size | sha256 and size match | fetched from the upstream: $(echo "$upstream" | cut -d/ -f3) |"
+          } > "$work/MIRROR.md"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --title "${title:-$tag}" --latest=false \
+              --notes "Mirrored by CI from $upstream: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Checked against $CATALOG (sha256 and size); see MIRROR.md."
+          fi
+          gh release upload "$tag" "$work/$name" "$work/SHA256SUMS" "$work/MIRROR.md" --clobber
+          [ "$(stored)" = "sha256:$sha" ] || { echo "::error::GitHub stored $name as $(stored), not sha256:$sha"; exit 1; }
+          echo "$name mirrored to $tag ($got_size bytes, sha256 $sha)"
