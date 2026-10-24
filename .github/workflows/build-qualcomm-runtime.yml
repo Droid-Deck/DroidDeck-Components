@@ -1,0 +1,51 @@
+name: Build Qualcomm runtime
+
+on:
+  push:
+    branches: [qualcomm-runtime]
+    paths:
+      - 'tools/qualcomm-runtime/**'
+      - '.github/workflows/build-qualcomm-runtime.yml'
+
+permissions:
+  contents: write
+
+env:
+  SOURCE_REPO: K11MCH1/DroidDeck
+  SOURCE_SHA: 09eb999a3ad742cb7f097761d8447997cef3d95f
+  TAG: qualcomm-runtime-r1
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          ref: ${{ env.SOURCE_SHA }}
+          path: dd
+          persist-credentials: false
+      - name: Build in Arch Linux ARM
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/work" -w /work menci/archlinuxarm:base-devel bash tools/qualcomm-runtime/build-in-arch.sh
+          sudo chown -R "$(id -u):$(id -g)" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qualcomm-runtime
+          path: |
+            qualcomm-builds.tar.zst
+            qualcomm-builds.tar.zst.sha256
+            gamescope-build.json
+            zink-build.json
+            wsi-build.json
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          notes="Qualcomm Gamescope, Zink and WSI for the experimental Qualcomm backend, built by tools/qualcomm/build_{gamescope,zink,wsi}.py at ${SOURCE_REPO}@${SOURCE_SHA} in Arch Linux ARM. The Gamescope source is inside the archive (source.tar.gz); Mesa and WSI sources are pinned in their licenses. sha256 $(cut -d' ' -f1 qualcomm-builds.tar.zst.sha256)"
+          gh release create "$TAG" --latest=false --title "$TAG" --notes "$notes" qualcomm-builds.tar.zst qualcomm-builds.tar.zst.sha256 gamescope-build.json zink-build.json wsi-build.json ||
+            gh release upload "$TAG" qualcomm-builds.tar.zst qualcomm-builds.tar.zst.sha256 gamescope-build.json zink-build.json wsi-build.json --clobber
