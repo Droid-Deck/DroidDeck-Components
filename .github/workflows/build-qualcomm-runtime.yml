@@ -12,7 +12,7 @@ permissions:
 
 env:
   SOURCE_REPO: K11MCH1/DroidDeck
-  SOURCE_SHA: 09eb999a3ad742cb7f097761d8447997cef3d95f
+  SOURCE_SHA: eb83fcb3e34ddb206d6201755786b3b5f02a4caf
   TAG: qualcomm-runtime-r1
 
 jobs:
