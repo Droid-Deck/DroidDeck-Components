@@ -2,7 +2,7 @@ name: Build Qualcomm runtime
 
 on:
   push:
-    branches: [qualcomm-runtime]
+    branches: [qualcomm-runtime, qualcomm-runtime-r3]
     paths:
       - 'tools/qualcomm-runtime/**'
       - '.github/workflows/build-qualcomm-runtime.yml'
@@ -11,9 +11,10 @@ permissions:
   contents: write
 
 env:
-  SOURCE_REPO: K11MCH1/DroidDeck
-  SOURCE_SHA: eb83fcb3e34ddb206d6201755786b3b5f02a4caf
-  TAG: qualcomm-runtime-r2
+  SOURCE_REPO: Droid-Deck/DroidDeck
+  SOURCE_SHA: 4b8c7f84150768f821a05b8a5eae8afb80248eaf
+  TAG: qualcomm-runtime-r3-4b8c7f84-qa
+  PRERELEASE: 'true'
 
 jobs:
   build:
@@ -32,6 +33,10 @@ jobs:
           set -euo pipefail
           docker run --rm -v "$PWD:/work" -w /work menci/archlinuxarm:base-devel bash tools/qualcomm-runtime/build-in-arch.sh
           sudo chown -R "$(id -u):$(id -g)" .
+      # The libhybris bridge and the WSI layer archive were published on wallentx/DroidDeck. They are copied here
+      # unchanged, checked against the pins in the source tree, so DroidDeck does not depend on that account.
+      - name: Mirror the pinned bridge and WSI archives
+        run: python3 tools/qualcomm-runtime/mirror.py dd/tools/qualcomm/runtime.json mirror
       - uses: actions/upload-artifact@v4
         with:
           name: qualcomm-runtime
@@ -41,11 +46,20 @@ jobs:
             gamescope-build.json
             zink-build.json
             wsi-build.json
+            mirror/*
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          notes="Qualcomm Gamescope, Zink and WSI for the experimental Qualcomm backend, built by tools/qualcomm/build_{gamescope,zink,wsi}.py at ${SOURCE_REPO}@${SOURCE_SHA} in Arch Linux ARM. The Gamescope source is inside the archive (source.tar.gz); Mesa and WSI sources are pinned in their licenses. sha256 $(cut -d' ' -f1 qualcomm-builds.tar.xz.sha256)"
-          gh release create "$TAG" --latest=false --title "$TAG" --notes "$notes" qualcomm-builds.tar.xz qualcomm-builds.tar.xz.sha256 gamescope-build.json zink-build.json wsi-build.json ||
-            gh release upload "$TAG" qualcomm-builds.tar.xz qualcomm-builds.tar.xz.sha256 gamescope-build.json zink-build.json wsi-build.json --clobber
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "::error::$TAG exists; a published tag is never replaced"; exit 1; fi
+          {
+            echo "Qualcomm Gamescope, Zink and WSI for the experimental Qualcomm backend, built by tools/qualcomm/build_{gamescope,zink,wsi}.py at ${SOURCE_REPO}@${SOURCE_SHA} in Arch Linux ARM. The Gamescope source is inside the archive (source.tar.gz); Mesa and WSI sources are pinned in their licenses. sha256 $(cut -d' ' -f1 qualcomm-builds.tar.xz.sha256)"
+            echo
+            cat mirror/MIRROR.md
+          } > notes.md
+          pre=()
+          [ "$PRERELEASE" = true ] && pre=(--prerelease)
+          gh release create "$TAG" "${pre[@]}" --latest=false --title "$TAG" --notes-file notes.md \
+            qualcomm-builds.tar.xz qualcomm-builds.tar.xz.sha256 gamescope-build.json zink-build.json wsi-build.json \
+            mirror/*.tzst mirror/*.zip mirror/mirror.json
