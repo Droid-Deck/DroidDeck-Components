@@ -15,8 +15,8 @@ env:
   BUILDER_REPO: wallentx/DroidDeck
   BUILDER_SHA: 4ed93fb9ee6e2a0b24ff087196f2e93d247fd985
   PATCH_REPO: Droid-Deck/DroidDeck
-  PATCH_SHA: e7fad94b704e5e88ad277e84834581b91492dee6
-  TAG: hybris-runtime-4ed93fb9-dde7fad94b-qa
+  PATCH_SHA: a132a6de9786fd449d7fd9f0075a8fe897e935e1
+  TAG: hybris-runtime-4ed93fb9-dda132a6de-qa
 
 jobs:
   build:
@@ -73,7 +73,7 @@ jobs:
           set -euo pipefail
           if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "::error::$TAG exists; a published tag is never replaced"; exit 1; fi
           cat > notes.md <<NOTES
-          libhybris Vulkan bridge for DroidDeck's experimental Qualcomm backend, built by [wallentx](https://github.com/wallentx)'s builder (${BUILDER_REPO}@${BUILDER_SHA}, tools/hybris with patches 0001-0011) from taowen/libhybris, plus ${PATCH_REPO}@${PATCH_SHA} tools/qualcomm/hybris-patches (0012: accept Android loaders that wrap vkGetPhysicalDeviceProperties, e.g. Android 14; 0013: answer the KHR calibrated-timestamp queries with the EXT entries; 0014: hide host flags on covered host-visible memory types). The patched source is inside the archive (licenses/). sha256 $(cut -d' ' -f1 runtime.tzst.sha256)
+          libhybris Vulkan bridge for DroidDeck's experimental Qualcomm backend, built by [wallentx](https://github.com/wallentx)'s builder (${BUILDER_REPO}@${BUILDER_SHA}, tools/hybris with patches 0001-0011) from taowen/libhybris, plus ${PATCH_REPO}@${PATCH_SHA} tools/qualcomm/hybris-patches (0012: accept Android loaders that wrap vkGetPhysicalDeviceProperties, e.g. Android 14; 0013: answer the KHR calibrated-timestamp queries with the EXT entries; 0014: hide host flags on covered host-visible memory types; 0015: placed-memory dedicated-export mode for Qualcomm). The patched source is inside the archive (licenses/). sha256 $(cut -d' ' -f1 runtime.tzst.sha256)
           NOTES
           gh release create "$TAG" -R "$GITHUB_REPOSITORY" --prerelease --latest=false --title "$TAG" --notes-file notes.md \
             runtime.tzst runtime.tzst.sha256 hybris-component.json
