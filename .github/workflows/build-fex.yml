@@ -5,16 +5,23 @@ name: Build FEX for the x86-64 Steam client
 # in fex.json, which the app follows: a device that reads the old fex.json meanwhile gets an archive that
 # does not match and keeps its FEX. Nothing is uploaded by hand.
 
+run-name: FEX ${{ inputs.fex || 'pinned' }} from ${{ inputs.ref }}
+
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version recorded in fex.json, e.g. 2610-r6 (the FEX release, then a build number that only grows)'
-        required: true
+        description: 'Version recorded in fex.json, e.g. 2610-r6 (the FEX release, then a build number that only grows); empty picks the next one'
+        required: false
+        default: ''
       ref:
         description: 'Droid-Deck/DroidDeck branch, tag or commit whose tools/fex is built'
         required: true
         default: 'main'
+      fex:
+        description: 'FEX release tag to build, e.g. FEX-2611; empty builds the one tools/fex pins'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -29,6 +36,7 @@ jobs:
     timeout-minutes: 120
     outputs:
       commit: ${{ steps.source.outputs.commit }}
+      fex: ${{ steps.source.outputs.fex }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,11 +45,20 @@ jobs:
           persist-credentials: false
           sparse-checkout: tools/fex
       - id: source
-        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Build in Arch Linux ARM
+        env:
+          FEX: ${{ inputs.fex }}
         run: |
           set -euo pipefail
-          docker run --rm -e FEX_THUNKS=1 -v "$PWD:/work" -w /work menci/archlinuxarm:base-devel bash tools/fex/build-in-arch.sh
+          [ -n "$FEX" ] || FEX=$(grep -oE 'FEX_VERSION:-FEX-[0-9]+' tools/fex/build-in-arch.sh | cut -d- -f2-)
+          echo "$FEX" | grep -Eqx 'FEX-[0-9]{4}' || { echo "::error::not a FEX release tag: $FEX"; exit 1; }
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "fex=$FEX" >> "$GITHUB_OUTPUT"
+      - name: Build in Arch Linux ARM
+        env:
+          FEX: ${{ steps.source.outputs.fex }}
+        run: |
+          set -euo pipefail
+          docker run --rm -e FEX_THUNKS=1 -e FEX_VERSION="$FEX" -v "$PWD:/work" -w /work menci/archlinuxarm:base-devel bash tools/fex/build-in-arch.sh
           sudo chown -R "$(id -u):$(id -g)" .
       - uses: actions/upload-artifact@v4
         with:
@@ -69,8 +86,10 @@ jobs:
           GH_REPO: ${{ github.repository }}
           VERSION: ${{ inputs.version }}
           COMMIT: ${{ needs.build.outputs.commit }}
+          FEX: ${{ needs.build.outputs.fex }}
         run: |
           set -euo pipefail
+          [ -n "$VERSION" ] || VERSION=$(python3 tools/fex/plan.py next-version fex.json "$FEX")
           echo "$VERSION" | grep -Eqx '[0-9]+-r[0-9]+' || { echo "::error::version must look like 2610-r6"; exit 1; }
           current=$(python3 -c "import json; print(json.load(open('fex.json')).get('version', ''))")
           if [ "$current" = "$VERSION" ]; then
@@ -88,14 +107,16 @@ jobs:
           stored=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/fex" --jq '.assets[] | select(.name == "fex.tzst") | .digest')
           [ "$stored" = "sha256:$sha" ] || { echo "::error::GitHub stored fex.tzst as $stored, not sha256:$sha"; exit 1; }
           gh release edit fex --latest=false --prerelease=false \
-            --notes "FEX $VERSION: tools/fex of Droid-Deck/DroidDeck $COMMIT, built by $run. sha256 $sha, $size bytes. Replaced by build-fex.yml with each build; fex.json records the current one."
-          python3 - "$VERSION" "$sha" "$size" "$COMMIT" <<'PY'
+            --notes "FEX $VERSION ($FEX): tools/fex of Droid-Deck/DroidDeck $COMMIT, built by $run. sha256 $sha, $size bytes. Replaced by build-fex.yml with each build; fex.json records the current one."
+          python3 - "$VERSION" "$sha" "$size" "$COMMIT" "$FEX" <<'PY'
           import json, sys
-          version, sha, size, commit = sys.argv[1:5]
+          version, sha, size, commit, fex = sys.argv[1:6]
           d = json.load(open("fex.json"))
           d.update({
               "release": "fex",
               "version": version,
+              "fex": fex,
+              "source": commit,
               "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/fex/fex.tzst",
               "sha256": sha,
               "size": int(size),
@@ -110,6 +131,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add fex.json
-          git commit -m "FEX $VERSION for the x86-64 Steam client" -m "tools/fex of Droid-Deck/DroidDeck $COMMIT, built by $run."
+          git commit -m "FEX $VERSION ($FEX) for x86 programs" -m "tools/fex of Droid-Deck/DroidDeck $COMMIT, built by $run."
           git pull --rebase --quiet origin main
           git push origin HEAD:main

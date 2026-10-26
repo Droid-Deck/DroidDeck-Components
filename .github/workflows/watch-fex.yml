@@ -1,0 +1,53 @@
+name: Watch FEX
+
+on:
+  schedule:
+    - cron: '41 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: watch-fex
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    if: ${{ github.repository == 'Droid-Deck/DroidDeck-Components' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compare FEX and tools/fex with the published build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          busy=$(gh run list -R "$REPO" -w build-fex.yml --json status --jq '[.[] | select(.status != "completed")] | length')
+          if [ "$busy" -gt 0 ]; then
+            echo "A FEX build is still going; checking again next time."
+            exit 0
+          fi
+          tag=$(gh api repos/FEX-Emu/FEX/releases/latest --jq .tag_name)
+          source=$(gh api "repos/Droid-Deck/DroidDeck/commits?path=tools/fex&sha=main&per_page=1" --jq '.[0].sha')
+          echo "$tag" | grep -Eqx 'FEX-[0-9]{4}' || { echo "::error::FEX's latest release is $tag"; exit 1; }
+          echo "$source" | grep -Eqx '[0-9a-f]{40}' || { echo "::error::could not read tools/fex on Droid-Deck/DroidDeck main"; exit 1; }
+          why=$(python3 tools/fex/plan.py changed fex.json "$tag" "$source")
+          if [ -z "$why" ]; then
+            echo "fex.json already has $tag from tools/fex ${source:0:12}."
+            exit 0
+          fi
+          title="FEX $tag from $source"
+          failed=$(gh run list -R "$REPO" -w build-fex.yml -L 50 --json displayTitle,conclusion \
+            --jq "[.[] | select(.displayTitle == \"$title\" and .conclusion == \"failure\")] | length")
+          if [ "$failed" -gt 0 ]; then
+            echo "::warning::$title failed before ($why); tools/fex needs a change for it."
+            exit 0
+          fi
+          gh workflow run build-fex.yml -R "$REPO" --ref main -f ref="$source" -f fex="$tag"
+          echo "Started $title: $why" | tee -a "$GITHUB_STEP_SUMMARY"
