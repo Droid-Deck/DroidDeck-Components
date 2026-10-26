@@ -1,0 +1,79 @@
+name: Build libhybris bridge
+
+on:
+  push:
+    branches: [qualcomm-runtime-r3]
+    paths:
+      - '.github/workflows/build-hybris-runtime.yml'
+
+permissions:
+  contents: write
+
+# wallentx/DroidDeck's builder (tools/hybris, patches 0001-0011) at the revision DroidDeck already pinned, plus the
+# patches in Droid-Deck/DroidDeck tools/qualcomm/hybris-patches. Publishes a -qa prerelease, never replacing a tag.
+env:
+  BUILDER_REPO: wallentx/DroidDeck
+  BUILDER_SHA: 4ed93fb9ee6e2a0b24ff087196f2e93d247fd985
+  PATCH_REPO: Droid-Deck/DroidDeck
+  PATCH_SHA: 06dd70c67e01ab8ed4916b8a430714d9a1e367d2
+  TAG: hybris-runtime-4ed93fb9-dd06dd70c6-qa
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BUILDER_REPO }}
+          ref: ${{ env.BUILDER_SHA }}
+          path: builder
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PATCH_REPO }}
+          ref: ${{ env.PATCH_SHA }}
+          path: dd
+          sparse-checkout: tools/qualcomm/hybris-patches
+          persist-credentials: false
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman patchelf zstd libvulkan-dev spirv-tools
+      - name: Add the DroidDeck patches to the builder's patch stack
+        run: |
+          set -euo pipefail
+          ls dd/tools/qualcomm/hybris-patches/*.patch
+          cp dd/tools/qualcomm/hybris-patches/*.patch builder/tools/hybris/patches/
+          ls builder/tools/hybris/patches
+      - name: Test component validation
+        working-directory: builder
+        run: python3 -m unittest tools.tests.test_hybris_component_record tools.tests.test_powervr_runtime
+      - name: Build the patched runtime
+        working-directory: builder
+        run: bash tools/hybris/build_runtime.sh out/hybris
+      - name: Record component provenance
+        working-directory: builder
+        env:
+          COMPONENT_URL: https://github.com/${{ github.repository }}/releases/download/${{ env.TAG }}/runtime.tzst
+        run: |
+          set -euo pipefail
+          python3 tools/hybris/component_record.py out/hybris/runtime.tzst --url "$COMPONENT_URL"
+          cat out/hybris/hybris-component.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hybris-runtime
+          path: builder/out/hybris/
+          if-no-files-found: error
+      - name: Publish
+        working-directory: builder/out/hybris
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "::error::$TAG exists; a published tag is never replaced"; exit 1; fi
+          cat > notes.md <<NOTES
+          libhybris Vulkan bridge for DroidDeck's experimental Qualcomm backend, built by [wallentx](https://github.com/wallentx)'s builder (${BUILDER_REPO}@${BUILDER_SHA}, tools/hybris with patches 0001-0011) from taowen/libhybris, plus ${PATCH_REPO}@${PATCH_SHA} tools/qualcomm/hybris-patches (0012: accept Android loaders that wrap vkGetPhysicalDeviceProperties, e.g. Android 14). The patched source is inside the archive (licenses/). sha256 $(cut -d' ' -f1 runtime.tzst.sha256)
+          NOTES
+          gh release create "$TAG" -R "$GITHUB_REPOSITORY" --prerelease --latest=false --title "$TAG" --notes-file notes.md \
+            runtime.tzst runtime.tzst.sha256 hybris-component.json
