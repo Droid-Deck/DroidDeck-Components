@@ -580,6 +580,18 @@ jobs:
       - name: Clone FEX
         run: bash tools/linux-nightly/clone.sh https://github.com/FEX-Emu/FEX.git source "$COMMIT"
 
+      - name: Apply DroidDeck-Proton's FEX patches
+        run: |
+          set -euo pipefail
+          git clone -q --depth 1 --filter=blob:none --sparse https://github.com/Droid-Deck/DroidDeck-Proton.git ddp
+          git -C ddp sparse-checkout set patches/fex
+          ls ddp/patches/fex/*.patch >/dev/null
+          for p in ddp/patches/fex/*.patch; do
+            echo "FEX patch: $(basename "$p")"
+            patch -d source -Np1 --forward < "$p"
+          done
+          echo "DDP_FEX_PATCHES=$(git -C ddp rev-parse --short=9 HEAD)" >> "$GITHUB_ENV"
+
       - name: Build the DLLs (arm64ec + wow64)
         run: |
           set -euo pipefail
@@ -635,6 +647,10 @@ jobs:
             || { echo "::error::libwow64fex.dll is not an ARM64 PE DLL"; exit 1; }
           loadcfg=$(llvm-readobj --coff-load-config "$WIN/libarm64ecfex.dll")
           grep -q 'CHPEMetadata' <<<"$loadcfg" || { echo "::error::libarm64ecfex.dll has no ARM64EC (CHPE) metadata"; exit 1; }
+          if ! grep -aq FEX_DEBUGLOG "$WIN/libarm64ecfex.dll" || ! grep -aq compilefault "$WIN/libarm64ecfex.dll" \
+            || ! grep -aq FEX_DEBUGLOG "$WIN/libwow64fex.dll"; then
+            echo "::error::the FEX DLLs were built without DroidDeck-Proton's patches/fex"; exit 1
+          fi
           for f in "$UNIX"/*.so; do
             file "$f" | grep -q 'ELF 64-bit LSB shared object, ARM aarch64' || { echo "::error::$f is not an aarch64 ELF shared object"; exit 1; }
             needed=$(aarch64-linux-gnu-readelf -d "$f" | grep NEEDED || true)
@@ -652,7 +668,7 @@ jobs:
           read -r tag distance version < <(bash tools/linux-nightly/version.sh source 'FEX-[0-9]*' FEX-)
           since=$([ "$distance" -eq 0 ] && echo "$tag" || echo "$distance commits past $tag")
           bash tools/linux-nightly/pack.sh fex stage out "DD-FEXCore-$version-nightly.wcp" "DD-$version-nightly" \
-            "FEX main, $since (${COMMIT:0:9}): 2 DLLs + 2 glibc unixlibs, one matched build. Upstream: FEX-Emu." \
+            "FEX main, $since (${COMMIT:0:9}) with DroidDeck-Proton's patches/fex ($DDP_FEX_PATCHES, Dmage22's FEX-D2 Blizzard loader fixes): 2 DLLs + 2 glibc unixlibs, one matched build. Upstream: FEX-Emu." \
             "$COMMIT" "$tag" "$distance" "$(git -C source log -1 --format=%s)"
 
       - name: ccache stats
