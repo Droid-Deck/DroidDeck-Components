@@ -65,6 +65,9 @@ all on one release that is kept up to date.
   [The412Banner/Nightlies](https://github.com/The412Banner/Nightlies)' all-in-one nightly (FEX's
   unixlibs against glibc), replaces their files on the release and rewrites its notes. If the
   gplasync patch no longer applies or builds on DXVK master, the previous gplasync file stays.
+  FEX gets [DroidDeck-Proton](https://github.com/Droid-Deck/DroidDeck-Proton)'s `patches/fex`
+  ([Dmage22](https://github.com/Dmage22/FEX-D2)'s fixes for Blizzard's protected loaders) on top of
+  FEX main; if they stop applying, the FEX build fails and the previous file stays.
   Only `main` publishes. Helpers in `tools/linux-nightly/`.
 
 ## License
