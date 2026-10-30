@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "category": "linux-runtime",
-  "release": "ubuntu-r1-rc2",
+  "release": "ubuntu-r1-rc3",
   "name": "Linux runtime (Ubuntu 26.04 LTS)",
-  "version": "ubuntu-r1-rc2",
-  "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/ubuntu-r1-rc2/ubuntu-r1-rc2.tar.zst",
-  "sha256": "277d7726aa1a8fcd2c2d864491e41d9b12749c51ce53e5caf3310e0880bdc8ee",
-  "size": 283398295,
-  "file_size": 283398295,
-  "note": "Ubuntu 26.04 LTS arm64 runtime for DroidDeck, built by tools/ubuntu in Droid-Deck/DroidDeck (PR #1733); rc2 adds libxcb-keysyms1 so the DD-Turnip driver loads (PR #1773). Its Kubuntu Plasma desktop pack is ubuntu-r1-rc2-desktop.tar.zst in the same release, named inside the runtime at usr/share/droiddeck/desktop-pack.json. Release candidate: only test builds of PR #1733 read this file."
+  "version": "ubuntu-r1-rc3",
+  "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/ubuntu-r1-rc3/ubuntu-r1-rc3.tar.zst",
+  "sha256": "e6f9b46129f67cc9460d871970fe7bc7da8c2c127d51116f8e9b56e7b2975167",
+  "size": 291458547,
+  "file_size": 291458547,
+  "note": "Ubuntu 26.04 LTS arm64 runtime for DroidDeck, built by tools/ubuntu in Droid-Deck/DroidDeck (PR #1733); rc2 adds libxcb-keysyms1 so the DD-Turnip driver loads (PR #1773); rc3 adds libva-drm2 and libva-x11-2 so Proton's media decoder loads and game cutscenes play (PR #1823). Its Kubuntu Plasma desktop pack is ubuntu-r1-rc3-desktop.tar.zst in the same release, named inside the runtime at usr/share/droiddeck/desktop-pack.json. Release candidate: only test builds of PR #1733 read this file."
 }
