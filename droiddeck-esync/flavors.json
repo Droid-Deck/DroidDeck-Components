@@ -46,7 +46,7 @@
    ],
    "keep": 3,
    "rev": 1,
-   "series": "valve-11",
+   "series": "ge-11",
    "profile": "valve",
    "source_match": false,
    "build_dir": "/home/tcrider/build",

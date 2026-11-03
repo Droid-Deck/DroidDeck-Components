@@ -1238,7 +1238,7 @@ class ShippedFilesTest(unittest.TestCase):
         ):
             self.assertEqual(bool(re.search(pattern, tag)), wanted, tag)
         self.assertEqual({name: cfg["series"] for name, cfg in flavors["flavors"].items()},
-                         {"valve": "valve-11", "ge": "valve-11", "cachyos": "cachyos-11"})
+                         {"valve": "valve-11", "ge": "ge-11", "cachyos": "cachyos-11"})
         self.assertEqual({name: cfg["source_match"] for name, cfg in flavors["flavors"].items()},
                          {"valve": True, "ge": False, "cachyos": False})
         self.assertEqual({name: cfg["build_dir"] for name, cfg in flavors["flavors"].items()},
