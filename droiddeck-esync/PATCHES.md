@@ -83,6 +83,17 @@ Proton build with esync is available.
 - A stock wineserver that already has esync built in (it prints `esync: up and running`) never
   gets a pack.
 
+## Patch series
+
+- `valve-11`: Valve's Proton 11 (experimental and proton-11.0), and GE up to GE-Proton11-11.
+- `ge-11`: GE-Proton11-12 and later. The same patch, ported to GE's
+  `server-keep-in-process-mutex-closed-while-in-use` (Jason Eggleston, GE `6161ec53`), which
+  `valve-11` no longer applies to: the client cache entry keeps GE's `serial` next to esync's
+  `shm_idx`, the server destroys an esync object before GE's ntsync orphan-mutex check, and GE's
+  whole-64K cache block mapping replaces the patch's page rounding. GE packs already published
+  keep the `valve-11` builds (a series change only affects builds that are not in the index).
+- `cachyos-11`: CachyOS Proton 11.
+
 ## Building and publishing
 
 `.github/workflows/watch-proton-releases.yml` runs every 20 minutes and decides when a build is

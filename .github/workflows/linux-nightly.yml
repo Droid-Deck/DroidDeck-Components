@@ -534,6 +534,7 @@ jobs:
     timeout-minutes: 90
     env:
       COMMIT: ${{ needs.plan.outputs.fex }}
+      DDP_FEX_PATCHES_REF: fbae0a3fc1140b919d557c255e066d44c7ceed9e
     steps:
       - uses: actions/checkout@v4
         with:
@@ -583,14 +584,19 @@ jobs:
       - name: Apply DroidDeck-Proton's FEX patches
         run: |
           set -euo pipefail
-          git clone -q --depth 1 --filter=blob:none --sparse https://github.com/Droid-Deck/DroidDeck-Proton.git ddp
+          git init -q ddp
+          git -C ddp remote add origin https://github.com/Droid-Deck/DroidDeck-Proton.git
           git -C ddp sparse-checkout set patches/fex
+          git -C ddp fetch -q --depth 1 --filter=blob:none origin "$DDP_FEX_PATCHES_REF"
+          git -C ddp checkout -q --detach FETCH_HEAD
+          git -C ddp apply "$GITHUB_WORKSPACE/tools/linux-nightly/fex-patches.patch"
           ls ddp/patches/fex/*.patch >/dev/null
           for p in ddp/patches/fex/*.patch; do
             echo "FEX patch: $(basename "$p")"
             patch -d source -Np1 --forward < "$p"
           done
-          echo "DDP_FEX_PATCHES=$(git -C ddp rev-parse --short=9 HEAD)" >> "$GITHUB_ENV"
+          patch_hash=$(sha256sum tools/linux-nightly/fex-patches.patch | cut -c1-9)
+          echo "DDP_FEX_PATCHES=$(git -C ddp rev-parse --short=9 HEAD)+$patch_hash" >> "$GITHUB_ENV"
 
       - name: Build the DLLs (arm64ec + wow64)
         run: |
