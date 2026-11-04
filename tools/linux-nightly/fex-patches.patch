@@ -1,0 +1,121 @@
+diff --git a/patches/fex/0001-Windows-track-executable-non-image-section-views-rep.patch b/patches/fex/0001-Windows-track-executable-non-image-section-views-rep.patch
+index 8f68b5b..cf15a22 100644
+--- a/patches/fex/0001-Windows-track-executable-non-image-section-views-rep.patch
++++ b/patches/fex/0001-Windows-track-executable-non-image-section-views-rep.patch
+@@ -30,8 +30,7 @@ the fault came from the following one.
+ 
+ ---
+  Source/Windows/ARM64EC/Module.cpp | 27 +++++++++++++++++++++++++--
+- Source/Windows/Common/Exception.h | 25 ++++++++++++++++++++++---
+- 2 files changed, 47 insertions(+), 5 deletions(-)
++ 1 file changed, 25 insertions(+), 2 deletions(-)
+ 
+ diff --git a/Source/Windows/ARM64EC/Module.cpp b/Source/Windows/ARM64EC/Module.cpp
+ index 80752f1b8..79b2a7cab 100644
+@@ -82,52 +81,5 @@ index 80752f1b8..79b2a7cab 100644
+    }
+  
+  
+-diff --git a/Source/Windows/Common/Exception.h b/Source/Windows/Common/Exception.h
+-index 12162233c..97124acf6 100644
+---- a/Source/Windows/Common/Exception.h
+-+++ b/Source/Windows/Common/Exception.h
+-@@ -6,6 +6,7 @@
+- #include <winternl.h>
+- 
+- #include <FEXCore/Utils/LogManager.h>
+-+#include <FEXCore/Utils/TypeDefines.h>
+- #include <FEXCore/Debug/InternalThreadState.h>
+- 
+- namespace FEX::Windows {
+-@@ -74,12 +75,30 @@ static inline EXCEPTION_RECORD HandleGuestException(FEXCore::Core::CpuStateFrame
+-       }
+-       break;
+-     case FEXCore::X86State::X86_TRAPNO_OF: Dst.ExceptionCode = EXCEPTION_INT_OVERFLOW; return Dst;
+--    case FEXCore::X86State::X86_TRAPNO_PF:
+--      // A page-fault raised by an explicit break in JIT code is always an execute fault
+-+    case FEXCore::X86State::X86_TRAPNO_PF: {
+-+      // A page-fault raised by an explicit break in JIT code is always an execute fault.
+-+      //
+-+      // The reported address has to be the first byte that could not be fetched, which is not always
+-+      // the start of the instruction: an instruction sitting at the tail of an executable page and
+-+      // running into the next one faults on that next page. Reporting the instruction start instead
+-+      // makes decrypt-on-demand protectors spin forever - their handler looks at
+-+      // ExceptionInformation[1], sees a page it has already unlocked, decides there is nothing to do,
+-+      // resumes, and faults identically. An x86 instruction is at most 15 bytes, so it can only ever
+-+      // cross a single page boundary.
+-+      uint64_t FaultAddress = Rip;
+-+      const uint64_t RipPage = Rip & FEXCore::Utils::FEX_PAGE_MASK;
+-+      constexpr ULONG ExecProt = PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
+-+      MEMORY_BASIC_INFORMATION Info;
+-+      if (VirtualQuery(reinterpret_cast<LPCVOID>(RipPage), &Info, sizeof(Info)) && Info.State == MEM_COMMIT &&
+-+          (Info.Protect & ExecProt)) {
+-+        FaultAddress = RipPage + FEXCore::Utils::FEX_PAGE_SIZE;
+-+      }
+-+
+-       Dst.NumberParameters = 2;
+-       Dst.ExceptionInformation[0] = EXCEPTION_EXECUTE_FAULT;
+--      Dst.ExceptionInformation[1] = Rip;
+-+      Dst.ExceptionInformation[1] = FaultAddress;
+-       return Dst;
+-+    }
+-     default: LogMan::Msg::EFmt("Unknown SIGSEGV trap: {}", Fault.TrapNo); break;
+-     }
+-     break;
+ -- 
+ 2.43.0
+-
+diff --git a/patches/fex/0005-Windows-set-EXCEPTION_ACCESS_VIOLATION-explicitly-fo.patch b/patches/fex/0005-Windows-set-EXCEPTION_ACCESS_VIOLATION-explicitly-fo.patch
+index 567e5b4..1164ce5 100644
+--- a/patches/fex/0005-Windows-set-EXCEPTION_ACCESS_VIOLATION-explicitly-fo.patch
++++ b/patches/fex/0005-Windows-set-EXCEPTION_ACCESS_VIOLATION-explicitly-fo.patch
+@@ -18,23 +18,19 @@ Blizzard's Eidolon protector expects an access violation on its PAGE_NOACCESS
+ decrypt-on-demand page; an illegal instruction there makes it report a crash.
+ 
+ ---
+- Source/Windows/Common/Exception.h | 3 +++
+- 1 file changed, 3 insertions(+)
++ Source/Windows/Common/Exception.h | 1 +
++ 1 file changed, 1 insertion(+)
+ 
+ diff --git a/Source/Windows/Common/Exception.h b/Source/Windows/Common/Exception.h
+ index 97124acf6..6b8528967 100644
+ --- a/Source/Windows/Common/Exception.h
+ +++ b/Source/Windows/Common/Exception.h
+-@@ -94,6 +94,9 @@ static inline EXCEPTION_RECORD HandleGuestException(FEXCore::Core::CpuStateFrame
+-         FaultAddress = RipPage + FEXCore::Utils::FEX_PAGE_SIZE;
+-       }
+- 
+-+      // Set the code explicitly like every other case: the host trap that got us here is not necessarily an
+-+      // access violation (on Windows the SIGSEGV trampoline raises it with hlt).
++@@ -79,4 +79,5 @@ static inline EXCEPTION_RECORD HandleGuestException(FEXCore::Core::CpuStateFrame
+ +      Dst.ExceptionCode = EXCEPTION_ACCESS_VIOLATION;
+        Dst.NumberParameters = 2;
+        Dst.ExceptionInformation[0] = EXCEPTION_EXECUTE_FAULT;
+-       Dst.ExceptionInformation[1] = FaultAddress;
++       Dst.ExceptionInformation[1] = Fault.FaultAddress ? Fault.FaultAddress : Rip;
++       return Dst;
+ -- 
+ 2.43.0
+ 
+diff --git a/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch b/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch
+index d360874..aee8bf0 100644
+--- a/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch
++++ b/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch
+@@ -149,13 +149,13 @@ index ef7e33299..230ae5133 100644
+  #include "Interface/Core/Dispatcher/Dispatcher.h"
+ @@ -878,6 +879,7 @@ CodeBuffer::CodeBufferAllocation Arm64JITCore::AllocateCodeBufferInSharedCache(s
+  
+- CPUBackend::CompiledCode Arm64JITCore::CompileCode(uint64_t Entry, uint64_t Size, bool SingleInst, const FEXCore::IR::IRListView* IR,
++ CPUBackend::CompiledCode Arm64JITCore::EmitJITCode(uint64_t Entry, uint64_t Size, bool SingleInst, const FEXCore::IR::IRListView* IR,
+                                                     FEXCore::Core::DebugData* DebugData, bool CheckTF) {
+ +  FEXCore::Diag::Note(FEXCore::Diag::CompiledBlocks);
+-   FEXCORE_PROFILE_SCOPED("Arm64::CompileCode");
++   FEXCORE_PROFILE_SCOPED("Arm64::EmitJITCode");
+  
+    const auto PrevNumAllocations = Relocations.size();
+-@@ -1200,6 +1202,7 @@ CPUBackend::CompiledCode Arm64JITCore::CompileCode(uint64_t Entry, uint64_t Size
++@@ -1200,6 +1202,7 @@ CPUBackend::CompiledCode Arm64JITCore::EmitJITCode(uint64_t Entry, uint64_t Size
+  }
+  
+  CPUBackend::CompiledCode Arm64JITCore::LoadCachedCode(std::span<const uint8_t> HostBytes) {

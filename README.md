@@ -67,7 +67,10 @@ all on one release that is kept up to date.
   gplasync patch no longer applies or builds on DXVK master, the previous gplasync file stays.
   FEX gets [DroidDeck-Proton](https://github.com/Droid-Deck/DroidDeck-Proton)'s `patches/fex`
   ([Dmage22](https://github.com/Dmage22/FEX-D2)'s fixes for Blizzard's protected loaders) on top of
-  FEX main; if they stop applying, the FEX build fails and the previous file stays.
+  FEX main. The patch source is pinned by `DDP_FEX_PATCHES_REF`; `tools/linux-nightly/fex-patches.patch`
+  rebases that series for upstream's exact fetch-fault address and renamed `EmitJITCode` entry point.
+  Package descriptions record the source commit and rebase hash. If patches stop applying, the FEX
+  build fails and the previous file stays.
   Only `main` publishes. Helpers in `tools/linux-nightly/`.
 
 ## License
