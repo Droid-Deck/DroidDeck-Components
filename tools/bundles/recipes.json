@@ -1284,5 +1284,183 @@
     "to": "win64/OpenAL32.dll"
    }
   ]
+ },
+ "vcredist2010_full__libs.tar.xz": {
+  "sources": [
+   {
+    "name": "vcredist2010__vcredist_x86.exe",
+    "url": "https://download.microsoft.com/download/C/6/D/C6D0FD4E-9E53-4897-9B91-836EBA2AACD3/vcredist_x86.exe",
+    "md5": "bd2af26fccd52e01511ff3e088f4c8bb",
+    "open": "install"
+   },
+   {
+    "name": "vcredist2010__vcredist_x64.exe",
+    "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2010__vcredist_x64.exe",
+    "md5": "be79543624f806ced4c7dff25751a3e4",
+    "open": "install"
+   }
+  ],
+  "files": [
+   {
+    "from": [
+     "vcredist2010__vcredist_x86.exe:*/syswow64/msvcp100.dll",
+     "vcredist2010__vcredist_x86.exe:*/winsxs/x86*/msvcp100.dll",
+     "vcredist2010__vcredist_x86.exe:*/msvcp100.dll"
+    ],
+    "to": "win32/msvcp100.dll"
+   },
+   {
+    "from": [
+     "vcredist2010__vcredist_x86.exe:*/syswow64/msvcr100.dll",
+     "vcredist2010__vcredist_x86.exe:*/winsxs/x86*/msvcr100.dll",
+     "vcredist2010__vcredist_x86.exe:*/msvcr100.dll"
+    ],
+    "to": "win32/msvcr100.dll"
+   },
+   {
+    "from": [
+     "vcredist2010__vcredist_x64.exe:*/system32/msvcp100.dll",
+     "vcredist2010__vcredist_x64.exe:*/winsxs/amd64*/msvcp100.dll",
+     "vcredist2010__vcredist_x64.exe:*/msvcp100.dll"
+    ],
+    "to": "win64/msvcp100.dll"
+   },
+   {
+    "from": [
+     "vcredist2010__vcredist_x64.exe:*/system32/msvcr100.dll",
+     "vcredist2010__vcredist_x64.exe:*/winsxs/amd64*/msvcr100.dll",
+     "vcredist2010__vcredist_x64.exe:*/msvcr100.dll"
+    ],
+    "to": "win64/msvcr100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/atl100.dll",
+    "to": "win32/atl100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100.dll",
+    "to": "win32/mfc100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100chs.dll",
+    "to": "win32/mfc100chs.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100cht.dll",
+    "to": "win32/mfc100cht.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100deu.dll",
+    "to": "win32/mfc100deu.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100enu.dll",
+    "to": "win32/mfc100enu.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100esn.dll",
+    "to": "win32/mfc100esn.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100fra.dll",
+    "to": "win32/mfc100fra.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100ita.dll",
+    "to": "win32/mfc100ita.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100jpn.dll",
+    "to": "win32/mfc100jpn.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100kor.dll",
+    "to": "win32/mfc100kor.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100rus.dll",
+    "to": "win32/mfc100rus.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfc100u.dll",
+    "to": "win32/mfc100u.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfcm100.dll",
+    "to": "win32/mfcm100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/mfcm100u.dll",
+    "to": "win32/mfcm100u.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x86.exe:*/vcomp100.dll",
+    "to": "win32/vcomp100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/atl100.dll",
+    "to": "win64/atl100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100.dll",
+    "to": "win64/mfc100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100chs.dll",
+    "to": "win64/mfc100chs.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100cht.dll",
+    "to": "win64/mfc100cht.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100deu.dll",
+    "to": "win64/mfc100deu.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100enu.dll",
+    "to": "win64/mfc100enu.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100esn.dll",
+    "to": "win64/mfc100esn.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100fra.dll",
+    "to": "win64/mfc100fra.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100ita.dll",
+    "to": "win64/mfc100ita.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100jpn.dll",
+    "to": "win64/mfc100jpn.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100kor.dll",
+    "to": "win64/mfc100kor.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100rus.dll",
+    "to": "win64/mfc100rus.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfc100u.dll",
+    "to": "win64/mfc100u.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfcm100.dll",
+    "to": "win64/mfcm100.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/mfcm100u.dll",
+    "to": "win64/mfcm100u.dll"
+   },
+   {
+    "from": "vcredist2010__vcredist_x64.exe:*/vcomp100.dll",
+    "to": "win64/vcomp100.dll"
+   }
+  ]
  }
 }

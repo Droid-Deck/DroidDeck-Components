@@ -3448,15 +3448,17 @@
     },
     {
       "name": "vcredist2010_dll",
-      "description": "Microsoft Visual C++ 2010 Redistributable - direct DLL copy (no installer; works on Proton 11 arm64ec). Core CRT runtime (atl100/vcomp100 not included).",
+      "description": "Microsoft Visual C++ 2010 Redistributable - direct DLL copy, including CRT, MFC, ATL and OpenMP (no installer; works on Proton 11 arm64ec).",
       "provider": "Microsoft",
       "dependencies": [],
       "status": "ready",
       "steps": [
         {
           "action": "archive_extract",
-          "file_name": "vcredist2010_dll__libs.tar.xz",
-          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2010_dll__libs.tar.xz"
+          "file_name": "vcredist2010_full__libs.tar.xz",
+          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2010_full__libs.tar.xz",
+          "file_checksum": "add32d9dce179721dafebdb3955541cc",
+          "file_size": "5103824"
         },
         {
           "action": "copy_dll",
@@ -3477,9 +3479,40 @@
           "action": "override_dll",
           "dll": "msvcr100",
           "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc100",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc100u",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm100",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm100u",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "atl100",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "vcomp100",
+          "type": "native,builtin"
         }
       ],
-      "prebaked": true
+      "prebaked": true,
+      "revision": 1
     },
     {
       "name": "vcredist2012",
