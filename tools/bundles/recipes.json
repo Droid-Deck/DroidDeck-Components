@@ -1265,6 +1265,416 @@
   ],
   "accept_different": "the hand-made bundle holds 14.50.35719, which Microsoft no longer serves; built from the Visual Studio 2026 release channel (14.51.36247, newer), so nothing regresses"
  },
+ "vcredist2022_full__libs.tar.xz": {
+  "sources": [
+   {
+    "name": "VC_redist.x86.exe",
+    "url": "https://download.visualstudio.microsoft.com/download/pr/ece44298-3977-4f73-ab91-c13fe79cfea8/F0BAB33A302B3CDB2E11113760D016F54FD3D2632C65BA7834FAC4F0ABD7F1A3/VC_redist.x86.exe",
+    "md5": "8f442d99f1a6bbd563bac8a3cc39953d",
+    "open": "install"
+   },
+   {
+    "name": "VC_redist.x64.exe",
+    "url": "https://download.visualstudio.microsoft.com/download/pr/ebdab8e5-1d7b-4d9f-a11b-cbb1720c3b12/843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C/VC_redist.x64.exe",
+    "md5": "8da7373f3ec287fe1c3ad72a7b2922f0",
+    "open": "install"
+   }
+  ],
+  "files": [
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/concrt140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/concrt140.dll",
+     "VC_redist.x86.exe:*/concrt140.dll"
+    ],
+    "to": "win32/concrt140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/msvcp140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/msvcp140.dll",
+     "VC_redist.x86.exe:*/msvcp140.dll"
+    ],
+    "to": "win32/msvcp140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/msvcp140_1.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/msvcp140_1.dll",
+     "VC_redist.x86.exe:*/msvcp140_1.dll"
+    ],
+    "to": "win32/msvcp140_1.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/msvcp140_2.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/msvcp140_2.dll",
+     "VC_redist.x86.exe:*/msvcp140_2.dll"
+    ],
+    "to": "win32/msvcp140_2.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/msvcp140_atomic_wait.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/msvcp140_atomic_wait.dll",
+     "VC_redist.x86.exe:*/msvcp140_atomic_wait.dll"
+    ],
+    "to": "win32/msvcp140_atomic_wait.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/msvcp140_codecvt_ids.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/msvcp140_codecvt_ids.dll",
+     "VC_redist.x86.exe:*/msvcp140_codecvt_ids.dll"
+    ],
+    "to": "win32/msvcp140_codecvt_ids.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/vcamp140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/vcamp140.dll",
+     "VC_redist.x86.exe:*/vcamp140.dll"
+    ],
+    "to": "win32/vcamp140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/vccorlib140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/vccorlib140.dll",
+     "VC_redist.x86.exe:*/vccorlib140.dll"
+    ],
+    "to": "win32/vccorlib140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/vcomp140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/vcomp140.dll",
+     "VC_redist.x86.exe:*/vcomp140.dll"
+    ],
+    "to": "win32/vcomp140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/vcruntime140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/vcruntime140.dll",
+     "VC_redist.x86.exe:*/vcruntime140.dll"
+    ],
+    "to": "win32/vcruntime140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/concrt140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/concrt140.dll",
+     "VC_redist.x64.exe:*/concrt140.dll"
+    ],
+    "to": "win64/concrt140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/msvcp140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/msvcp140.dll",
+     "VC_redist.x64.exe:*/msvcp140.dll"
+    ],
+    "to": "win64/msvcp140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/msvcp140_1.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/msvcp140_1.dll",
+     "VC_redist.x64.exe:*/msvcp140_1.dll"
+    ],
+    "to": "win64/msvcp140_1.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/msvcp140_2.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/msvcp140_2.dll",
+     "VC_redist.x64.exe:*/msvcp140_2.dll"
+    ],
+    "to": "win64/msvcp140_2.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/msvcp140_atomic_wait.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/msvcp140_atomic_wait.dll",
+     "VC_redist.x64.exe:*/msvcp140_atomic_wait.dll"
+    ],
+    "to": "win64/msvcp140_atomic_wait.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/msvcp140_codecvt_ids.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/msvcp140_codecvt_ids.dll",
+     "VC_redist.x64.exe:*/msvcp140_codecvt_ids.dll"
+    ],
+    "to": "win64/msvcp140_codecvt_ids.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/vcamp140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/vcamp140.dll",
+     "VC_redist.x64.exe:*/vcamp140.dll"
+    ],
+    "to": "win64/vcamp140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/vccorlib140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/vccorlib140.dll",
+     "VC_redist.x64.exe:*/vccorlib140.dll"
+    ],
+    "to": "win64/vccorlib140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/vcomp140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/vcomp140.dll",
+     "VC_redist.x64.exe:*/vcomp140.dll"
+    ],
+    "to": "win64/vcomp140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/vcruntime140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/vcruntime140.dll",
+     "VC_redist.x64.exe:*/vcruntime140.dll"
+    ],
+    "to": "win64/vcruntime140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/vcruntime140_1.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/vcruntime140_1.dll",
+     "VC_redist.x64.exe:*/vcruntime140_1.dll"
+    ],
+    "to": "win64/vcruntime140_1.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140.dll",
+     "VC_redist.x86.exe:*/mfc140.dll"
+    ],
+    "to": "win32/mfc140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140.dll",
+     "VC_redist.x64.exe:*/mfc140.dll"
+    ],
+    "to": "win64/mfc140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140u.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140u.dll",
+     "VC_redist.x86.exe:*/mfc140u.dll"
+    ],
+    "to": "win32/mfc140u.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140u.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140u.dll",
+     "VC_redist.x64.exe:*/mfc140u.dll"
+    ],
+    "to": "win64/mfc140u.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfcm140.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfcm140.dll",
+     "VC_redist.x86.exe:*/mfcm140.dll"
+    ],
+    "to": "win32/mfcm140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfcm140.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfcm140.dll",
+     "VC_redist.x64.exe:*/mfcm140.dll"
+    ],
+    "to": "win64/mfcm140.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfcm140u.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfcm140u.dll",
+     "VC_redist.x86.exe:*/mfcm140u.dll"
+    ],
+    "to": "win32/mfcm140u.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfcm140u.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfcm140u.dll",
+     "VC_redist.x64.exe:*/mfcm140u.dll"
+    ],
+    "to": "win64/mfcm140u.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140chs.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140chs.dll",
+     "VC_redist.x86.exe:*/mfc140chs.dll"
+    ],
+    "to": "win32/mfc140chs.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140chs.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140chs.dll",
+     "VC_redist.x64.exe:*/mfc140chs.dll"
+    ],
+    "to": "win64/mfc140chs.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140cht.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140cht.dll",
+     "VC_redist.x86.exe:*/mfc140cht.dll"
+    ],
+    "to": "win32/mfc140cht.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140cht.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140cht.dll",
+     "VC_redist.x64.exe:*/mfc140cht.dll"
+    ],
+    "to": "win64/mfc140cht.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140deu.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140deu.dll",
+     "VC_redist.x86.exe:*/mfc140deu.dll"
+    ],
+    "to": "win32/mfc140deu.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140deu.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140deu.dll",
+     "VC_redist.x64.exe:*/mfc140deu.dll"
+    ],
+    "to": "win64/mfc140deu.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140enu.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140enu.dll",
+     "VC_redist.x86.exe:*/mfc140enu.dll"
+    ],
+    "to": "win32/mfc140enu.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140enu.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140enu.dll",
+     "VC_redist.x64.exe:*/mfc140enu.dll"
+    ],
+    "to": "win64/mfc140enu.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140esn.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140esn.dll",
+     "VC_redist.x86.exe:*/mfc140esn.dll"
+    ],
+    "to": "win32/mfc140esn.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140esn.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140esn.dll",
+     "VC_redist.x64.exe:*/mfc140esn.dll"
+    ],
+    "to": "win64/mfc140esn.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140fra.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140fra.dll",
+     "VC_redist.x86.exe:*/mfc140fra.dll"
+    ],
+    "to": "win32/mfc140fra.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140fra.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140fra.dll",
+     "VC_redist.x64.exe:*/mfc140fra.dll"
+    ],
+    "to": "win64/mfc140fra.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140ita.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140ita.dll",
+     "VC_redist.x86.exe:*/mfc140ita.dll"
+    ],
+    "to": "win32/mfc140ita.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140ita.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140ita.dll",
+     "VC_redist.x64.exe:*/mfc140ita.dll"
+    ],
+    "to": "win64/mfc140ita.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140jpn.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140jpn.dll",
+     "VC_redist.x86.exe:*/mfc140jpn.dll"
+    ],
+    "to": "win32/mfc140jpn.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140jpn.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140jpn.dll",
+     "VC_redist.x64.exe:*/mfc140jpn.dll"
+    ],
+    "to": "win64/mfc140jpn.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140kor.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140kor.dll",
+     "VC_redist.x86.exe:*/mfc140kor.dll"
+    ],
+    "to": "win32/mfc140kor.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140kor.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140kor.dll",
+     "VC_redist.x64.exe:*/mfc140kor.dll"
+    ],
+    "to": "win64/mfc140kor.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x86.exe:*/syswow64/mfc140rus.dll",
+     "VC_redist.x86.exe:*/winsxs/x86*/mfc140rus.dll",
+     "VC_redist.x86.exe:*/mfc140rus.dll"
+    ],
+    "to": "win32/mfc140rus.dll"
+   },
+   {
+    "from": [
+     "VC_redist.x64.exe:*/system32/mfc140rus.dll",
+     "VC_redist.x64.exe:*/winsxs/amd64*/mfc140rus.dll",
+     "VC_redist.x64.exe:*/mfc140rus.dll"
+    ],
+    "to": "win64/mfc140rus.dll"
+   }
+  ]
+ },
  "oalinst_dll__libs.tar.xz": {
   "sources": [
    {
