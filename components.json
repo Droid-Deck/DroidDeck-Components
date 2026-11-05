@@ -4026,15 +4026,17 @@
     },
     {
       "name": "vcredist2022_dll",
-      "description": "Microsoft Visual C++ 2015-2022 Redistributable - direct DLL copy (no installer; works on Proton 11 arm64ec). Supersedes vcredist2015/2019. UCRT (ucrtbase/api-ms-win-crt-*) provided by Wine builtin.",
+      "description": "Microsoft Visual C++ 2015-2022 Redistributable - direct DLL copy, including MFC (no installer; works on Proton 11 arm64ec). Supersedes vcredist2015/2019. UCRT (ucrtbase/api-ms-win-crt-*) provided by Wine builtin.",
       "provider": "Microsoft",
       "dependencies": [],
       "status": "ready",
       "steps": [
         {
           "action": "archive_extract",
-          "file_name": "vcredist2022_dll__libs.tar.xz",
-          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2022_dll__libs.tar.xz"
+          "file_name": "vcredist2022_full__libs.tar.xz",
+          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2022_full__libs.tar.xz",
+          "file_checksum": "74d446ccbf5a38512d7232143fa65037",
+          "file_size": "5686372"
         },
         {
           "action": "copy_dll",
@@ -4100,21 +4102,44 @@
           "action": "override_dll",
           "dll": "vcruntime140_1",
           "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc140",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc140u",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm140",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm140u",
+          "type": "native,builtin"
         }
       ],
-      "prebaked": true
+      "prebaked": true,
+      "revision": 1
     },
       {
       "name": "vcredist2015_dll",
-      "description": "Microsoft Visual C++ 2015 Redistributable - direct DLL copy (14.x runtime, same as 2015-2022; no installer; works on Proton 11).",
+      "description": "Microsoft Visual C++ 2015 Redistributable - direct DLL copy, including MFC (14.x runtime, same as 2015-2022; no installer; works on Proton 11).",
       "provider": "Microsoft",
       "dependencies": [],
       "status": "ready",
       "steps": [
         {
           "action": "archive_extract",
-          "file_name": "vcredist2022_dll__libs.tar.xz",
-          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2022_dll__libs.tar.xz"
+          "file_name": "vcredist2022_full__libs.tar.xz",
+          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2022_full__libs.tar.xz",
+          "file_checksum": "74d446ccbf5a38512d7232143fa65037",
+          "file_size": "5686372"
         },
         {
           "action": "copy_dll",
@@ -4135,21 +4160,44 @@
           "action": "override_dll",
           "dll": "vcruntime140",
           "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc140",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc140u",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm140",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm140u",
+          "type": "native,builtin"
         }
       ],
-      "prebaked": true
+      "prebaked": true,
+      "revision": 1
     },
       {
       "name": "vcredist2019_dll",
-      "description": "Microsoft Visual C++ 2019 Redistributable - direct DLL copy (14.x runtime, same as 2015-2022; no installer; works on Proton 11).",
+      "description": "Microsoft Visual C++ 2019 Redistributable - direct DLL copy, including MFC (14.x runtime, same as 2015-2022; no installer; works on Proton 11).",
       "provider": "Microsoft",
       "dependencies": [],
       "status": "ready",
       "steps": [
         {
           "action": "archive_extract",
-          "file_name": "vcredist2022_dll__libs.tar.xz",
-          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2022_dll__libs.tar.xz"
+          "file_name": "vcredist2022_full__libs.tar.xz",
+          "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/system-libraries-v1/vcredist2022_full__libs.tar.xz",
+          "file_checksum": "74d446ccbf5a38512d7232143fa65037",
+          "file_size": "5686372"
         },
         {
           "action": "copy_dll",
@@ -4170,9 +4218,30 @@
           "action": "override_dll",
           "dll": "vcruntime140",
           "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc140",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfc140u",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm140",
+          "type": "native,builtin"
+        },
+        {
+          "action": "override_dll",
+          "dll": "mfcm140u",
+          "type": "native,builtin"
         }
       ],
-      "prebaked": true
+      "prebaked": true,
+      "revision": 1
     },
     {
       "name": "vcredist6",
