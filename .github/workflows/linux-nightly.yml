@@ -205,6 +205,7 @@ jobs:
     timeout-minutes: 60
     env:
       COMMIT: ${{ needs.plan.outputs.dxvk }}
+      LLVM_MINGW_TAG: '20261104'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -286,6 +287,11 @@ jobs:
           cpu_family = 'aarch64'
           cpu = 'aarch64'
           endian = 'little'
+          [built-in options]
+          c_args = ['-marm64x']
+          cpp_args = ['-marm64x']
+          c_link_args = ['-marm64x']
+          cpp_link_args = ['-marm64x']
           EOF
           cat <<EOF > x86.txt
           [binaries]
@@ -323,9 +329,10 @@ jobs:
           copy_dll build-ec stage/system32
           copy_dll build-x86 stage/syswow64
           llvm-strip --strip-all stage/system32/*.dll stage/syswow64/*.dll
+          bash tools/linux-nightly/require-arm64x.sh stage/system32/*.dll
           since=$([ "$distance" -eq 0 ] && echo "$tag" || echo "$distance commits past $tag")
           bash tools/linux-nightly/pack.sh dxvk-arm64ec stage out "DD-dxvk-arm64ec-$version-nightly.wcp" "DD-$version-arm64ec-nightly" \
-            "DXVK master ARM64EC, $since (${COMMIT:0:8}). Upstream: Philip Rebohle." \
+            "DXVK master ARM64X, $since (${COMMIT:0:8}). Upstream: Philip Rebohle." \
             "$COMMIT" "$tag" "$distance" "$(git -C dxvk log -1 --format=%s)"
 
       - name: ccache stats
@@ -350,6 +357,7 @@ jobs:
         flavor: [standard, arm64ec]
     env:
       COMMIT: ${{ needs.plan.outputs.vkd3d }}
+      LLVM_MINGW_TAG: ${{ matrix.flavor == 'arm64ec' && '20261104' || '20251104' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -469,6 +477,11 @@ jobs:
           cpu_family = 'aarch64'
           cpu = 'aarch64'
           endian = 'little'
+          [built-in options]
+          c_args = ['-marm64x']
+          cpp_args = ['-marm64x']
+          c_link_args = ['-marm64x']
+          cpp_link_args = ['-marm64x']
           EOF
             cat <<EOF > cross-x86.txt
           [binaries]
@@ -504,11 +517,12 @@ jobs:
             find src/build-x86 -name "$n.dll" -exec cp -L {} stage/syswow64/ \;
           done
           llvm-strip --strip-all stage/system32/*.dll stage/syswow64/*.dll
+          [ "$FLAVOR" = standard ] || bash tools/linux-nightly/require-arm64x.sh stage/system32/*.dll
           since=$([ "$distance" -eq 0 ] && echo "$tag" || echo "$distance commits past $tag")
           if [ "$FLAVOR" = standard ]; then
             id=vkd3d-proton; vname="DD-$version-nightly"; what="VKD3D-Proton master"
           else
-            id=vkd3d-proton-arm64ec; vname="DD-$version-arm64ec-nightly"; what="VKD3D-Proton master ARM64EC"
+            id=vkd3d-proton-arm64ec; vname="DD-$version-arm64ec-nightly"; what="VKD3D-Proton master ARM64X"
           fi
           bash tools/linux-nightly/pack.sh "$id" stage out "DD-$id-$version-nightly.wcp" "$vname" \
             "$what, $since (${COMMIT:0:8}). Upstream: Hans-Kristian Arntzen." \
