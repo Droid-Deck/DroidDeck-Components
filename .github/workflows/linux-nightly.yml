@@ -205,6 +205,7 @@ jobs:
     timeout-minutes: 60
     env:
       COMMIT: ${{ needs.plan.outputs.dxvk }}
+      LLVM_MINGW_TAG: '20261104'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -356,6 +357,7 @@ jobs:
         flavor: [standard, arm64ec]
     env:
       COMMIT: ${{ needs.plan.outputs.vkd3d }}
+      LLVM_MINGW_TAG: ${{ matrix.flavor == 'arm64ec' && '20261104' || '20251104' }}
     steps:
       - uses: actions/checkout@v4
         with:
