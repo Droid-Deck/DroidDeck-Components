@@ -94,6 +94,14 @@ Proton build with esync is available.
   keep the `valve-11` builds (a series change only affects builds that are not in the index).
 - `cachyos-11`: CachyOS Proton 11.
 
+Each series also carries `0002-directory-users-ace.patch`. Wine builds a directory's DACL from its
+mode bits (SYSTEM, the owner, Everyone), and app data on Android is mode 0700, so no directory
+ever grants BUILTIN\Users anything. Steam's legacy DRM helper (`legacycompat/steamservice.exe
+/runfunc`, the "Updating executable" step of games like DiRT Showdown) picks random directories
+under `C:\windows` until one grants Users read access, 500 tries per directory, and under FEX it
+runs past Steam's timeout before giving up. The patch adds a read and execute ACE for Users to
+directories the owner can read, as Windows has on its own system folders.
+
 ## Building and publishing
 
 `.github/workflows/watch-proton-releases.yml` runs every 20 minutes and decides when a build is
