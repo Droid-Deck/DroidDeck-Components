@@ -23,7 +23,7 @@
    },
    "version_token": "{tag}-arm64",
    "keep": 2,
-   "rev": 1,
+   "rev": 2,
    "series": "valve-11",
    "profile": "valve",
    "source_match": true,
@@ -45,7 +45,7 @@
     "arm64\\.tar\\.(gz|xz)$"
    ],
    "keep": 3,
-   "rev": 1,
+   "rev": 2,
    "series": "ge-11",
    "profile": "valve",
    "source_match": false,
@@ -67,7 +67,7 @@
     "arm64\\.tar\\.(gz|xz)$"
    ],
    "keep": 3,
-   "rev": 1,
+   "rev": 2,
    "series": "cachyos-11",
    "profile": "cachyos",
    "source_match": false,
