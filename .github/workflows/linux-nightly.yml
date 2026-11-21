@@ -548,7 +548,7 @@ jobs:
     timeout-minutes: 90
     env:
       COMMIT: ${{ needs.plan.outputs.fex }}
-      DDP_FEX_PATCHES_REF: fbae0a3fc1140b919d557c255e066d44c7ceed9e
+      DDP_FEX_PATCHES_REF: 6694bcfef6664be85c0f4102e43fe50e1b1fe00a
     steps:
       - uses: actions/checkout@v4
         with:
