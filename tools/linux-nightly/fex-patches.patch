@@ -99,7 +99,7 @@ index 567e5b4..1164ce5 100644
  2.43.0
  
 diff --git a/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch b/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch
-index d360874..aee8bf0 100644
+index d360874..af6704e 100644
 --- a/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch
 +++ b/patches/fex/0013-ARM64EC-keep-translated-code-on-empty-reads-and-off-.patch
 @@ -149,13 +149,13 @@ index ef7e33299..230ae5133 100644
@@ -119,3 +119,103 @@ index d360874..aee8bf0 100644
   }
   
   CPUBackend::CompiledCode Arm64JITCore::LoadCachedCode(std::span<const uint8_t> HostBytes) {
+@@ -318,9 +318,9 @@ index 27319814f..747dd23b4 100644
+    }
+  
+ @@ -1053,6 +1056,7 @@ void NotifyMemoryAlloc(void* Address, SIZE_T Size, ULONG Type, ULONG Prot, BOOL
+-   } else {
+-     // MEM_RESET(_UNDO) ignores the passed permissions
+-     if (!Status && !(Type & (MEM_RESET | MEM_RESET_UNDO))) {
++     // (TYPE & MEM_RESERVE) = No need to track
++     const bool IsNotReserveWithoutCommit = (Type & (MEM_COMMIT | MEM_RESERVE)) != MEM_RESERVE;
++     if (WasSuccess && IsNotReset && IsNotReserveWithoutCommit) {
+ +      FEXCore::Diag::Note(FEXCore::Diag::MemAlloc, Size);
+        InvalidationTracker->HandleMemoryProtectionNotification(reinterpret_cast<uint64_t>(Address), static_cast<uint64_t>(Size), Prot);
+      }
+diff --git a/patches/fex/0090-ARM64EC-guard-the-fault-free-stale-NoExec-retry-and-.patch b/patches/fex/0090-ARM64EC-guard-the-fault-free-stale-NoExec-retry-and-.patch
+new file mode 100644
+index 0000000..4214853
+--- /dev/null
++++ b/patches/fex/0090-ARM64EC-guard-the-fault-free-stale-NoExec-retry-and-.patch
+@@ -0,0 +1,81 @@
++From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
++From: maxjivi05 <maxjividen@gmail.com>
++Date: Sat, 21 Nov 2026 13:45:00 -0500
++Subject: [PATCH] ARM64EC: guard the fault-free stale NoExec retry and keep the
++ next-page fetch fault
++
++Upstream main reaches SynchronousExceptionHandler from the fault-free
++synchronous fault stub with a plain branch, so InSyscallCallback is clear.
++Dropping a stale NoExec block there decommits lookup cache pages with the
++code invalidation mutex held; ntdll then calls NotifyMemoryFree, which takes
++ThreadCreationMutex and the non-recursive invalidation mutex again on the
++same thread and the process hangs. Set InSyscallCallback around the retry
++and restore the previous value.
++
++Upstream's partial-decode support fills SynchronousFaultData.FaultAddress
++with the instruction start for a full NoExec fault, which hides the page
++that could not be fetched when an instruction runs off an unlocked page
++into the next one. Report the next page in that case and use the decoder's
++address only when it points inside the instruction.
++
++Ported from Dmage22's FEX-D2 (2d8b53d39, ba05439d6).
++---
++diff --git a/Source/Windows/ARM64EC/Module.cpp b/Source/Windows/ARM64EC/Module.cpp
++index 4cf494e..e9accd7 100644
++--- a/Source/Windows/ARM64EC/Module.cpp
+++++ b/Source/Windows/ARM64EC/Module.cpp
++@@ -762,7 +762,12 @@ static void SynchronousExceptionHandler(FEXCore::Context::Context* CTX, FEXCore:
++   __asm volatile("mrs %[fpsr], fpsr" : [fpsr] "=r"(FPSR));
++ 
++   auto Context = StoreStateToPackedECContext(Thread, static_cast<uint32_t>(FPCR), static_cast<uint32_t>(FPSR));
++-  if (DropStaleNoExecBlock(Thread)) {
+++  const auto CPUArea = GetCPUArea();
+++  const bool PrevInSyscallCallback = CPUArea.Area->InSyscallCallback;
+++  CPUArea.Area->InSyscallCallback = true;
+++  const bool Dropped = DropStaleNoExecBlock(Thread);
+++  CPUArea.Area->InSyscallCallback = PrevInSyscallCallback;
+++  if (Dropped) {
++     NtContinueNative(&Context, false);
++     ERROR_AND_DIE_FMT("NtContinue returned");
++   }
++diff --git a/Source/Windows/Common/Exception.h b/Source/Windows/Common/Exception.h
++index 81fd202..b4c79f9 100644
++--- a/Source/Windows/Common/Exception.h
+++++ b/Source/Windows/Common/Exception.h
++@@ -6,6 +6,7 @@
++ #include <winternl.h>
++ 
++ #include <FEXCore/Utils/LogManager.h>
+++#include <FEXCore/Utils/TypeDefines.h>
++ #include <FEXCore/Debug/InternalThreadState.h>
++ 
++ namespace FEX::Windows {
++@@ -74,13 +75,23 @@ static inline EXCEPTION_RECORD HandleGuestException(FEXCore::Core::CpuStateFrame
++       }
++       break;
++     case FEXCore::X86State::X86_TRAPNO_OF: Dst.ExceptionCode = EXCEPTION_INT_OVERFLOW; return Dst;
++-    case FEXCore::X86State::X86_TRAPNO_PF:
+++    case FEXCore::X86State::X86_TRAPNO_PF: {
++       // A page-fault raised by an explicit break in JIT code is always an execute fault
+++      uint64_t FaultAddress = Rip;
+++      const uint64_t RipPage = Rip & FEXCore::Utils::FEX_PAGE_MASK;
+++      constexpr ULONG ExecProt = PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
+++      MEMORY_BASIC_INFORMATION Info;
+++      if (VirtualQuery(reinterpret_cast<LPCVOID>(RipPage), &Info, sizeof(Info)) && Info.State == MEM_COMMIT &&
+++          (Info.Protect & ExecProt)) {
+++        FaultAddress = RipPage + FEXCore::Utils::FEX_PAGE_SIZE;
+++      }
+++
++       Dst.ExceptionCode = EXCEPTION_ACCESS_VIOLATION;
++       Dst.NumberParameters = 2;
++       Dst.ExceptionInformation[0] = EXCEPTION_EXECUTE_FAULT;
++-      Dst.ExceptionInformation[1] = Fault.FaultAddress ? Fault.FaultAddress : Rip;
+++      Dst.ExceptionInformation[1] = (Fault.FaultAddress && Fault.FaultAddress != Rip) ? Fault.FaultAddress : FaultAddress;
++       return Dst;
+++    }
++     default: LogMan::Msg::EFmt("Unknown SIGSEGV trap: {}", Fault.TrapNo); break;
++     }
++     break;
++-- 
++2.43.0
++
