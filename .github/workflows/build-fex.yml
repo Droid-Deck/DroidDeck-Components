@@ -5,7 +5,7 @@ name: Build FEX for the x86-64 Steam client
 # in fex.json, which the app follows: a device that reads the old fex.json meanwhile gets an archive that
 # does not match and keeps its FEX. Nothing is uploaded by hand.
 
-run-name: FEX ${{ inputs.fex || 'pinned' }} from ${{ inputs.ref }}
+run-name: FEX ${{ inputs.fex || 'latest' }} from ${{ inputs.ref }}
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ on:
         required: true
         default: 'main'
       fex:
-        description: 'FEX release tag to build, e.g. FEX-2611; empty builds the one tools/fex pins'
+        description: 'FEX release tag to build, e.g. FEX-2611.1; empty builds the latest FEX release'
         required: false
         default: ''
 
@@ -46,11 +46,12 @@ jobs:
           sparse-checkout: tools/fex
       - id: source
         env:
+          GH_TOKEN: ${{ github.token }}
           FEX: ${{ inputs.fex }}
         run: |
           set -euo pipefail
-          [ -n "$FEX" ] || FEX=$(grep -oE 'FEX_VERSION:-FEX-[0-9]+' tools/fex/build-in-arch.sh | cut -d- -f2-)
-          echo "$FEX" | grep -Eqx 'FEX-[0-9]{4}' || { echo "::error::not a FEX release tag: $FEX"; exit 1; }
+          [ -n "$FEX" ] || FEX=$(gh api repos/FEX-Emu/FEX/releases/latest --jq .tag_name)
+          echo "$FEX" | grep -Eqx 'FEX-[0-9]{4}(\.[0-9]+)?' || { echo "::error::not a FEX release tag: $FEX"; exit 1; }
           echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "fex=$FEX" >> "$GITHUB_OUTPUT"
       - name: Build in Arch Linux ARM

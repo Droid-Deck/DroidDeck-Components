@@ -35,7 +35,7 @@ jobs:
           fi
           tag=$(gh api repos/FEX-Emu/FEX/releases/latest --jq .tag_name)
           source=$(gh api "repos/Droid-Deck/DroidDeck/commits?path=tools/fex&sha=main&per_page=1" --jq '.[0].sha')
-          echo "$tag" | grep -Eqx 'FEX-[0-9]{4}' || { echo "::error::FEX's latest release is $tag"; exit 1; }
+          echo "$tag" | grep -Eqx 'FEX-[0-9]{4}(\.[0-9]+)?' || { echo "::error::FEX's latest release is $tag"; exit 1; }
           echo "$source" | grep -Eqx '[0-9a-f]{40}' || { echo "::error::could not read tools/fex on Droid-Deck/DroidDeck main"; exit 1; }
           why=$(python3 tools/fex/plan.py changed fex.json "$tag" "$source")
           if [ -z "$why" ]; then
