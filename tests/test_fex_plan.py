@@ -15,6 +15,13 @@ class FexPlanTest(unittest.TestCase):
         self.assertEqual("2610-r7", PLAN["next_version"]("2610-r6", "FEX-2610"))
         self.assertEqual("2611-r7", PLAN["next_version"]("2610-r6", "FEX-2611"))
 
+    def test_a_point_release_keeps_the_release_version(self):
+        self.assertEqual("2611-r11", PLAN["next_version"]("2611-r10", "FEX-2611.1"))
+        recorded = {"version": "2611-r10", "fex": "FEX-2611", "source": "a" * 40}
+        self.assertEqual(["FEX FEX-2611 -> FEX-2611.1"], PLAN["reasons"](recorded, "FEX-2611.1", "a" * 40))
+        with self.assertRaises(ValueError):
+            PLAN["next_version"]("2611-r10", "FEX-2611.")
+
     def test_a_first_build_is_r1(self):
         self.assertEqual("2610-r1", PLAN["next_version"](None, "FEX-2610"))
 

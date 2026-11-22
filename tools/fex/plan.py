@@ -2,7 +2,7 @@ import json
 import re
 import sys
 
-TAG = re.compile(r"FEX-(\d{4})")
+TAG = re.compile(r"FEX-(\d{4})(?:\.\d+)?")
 VERSION = re.compile(r"(\d+)-r(\d+)")
 
 
