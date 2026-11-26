@@ -3,12 +3,12 @@
   "category": "fex",
   "release": "fex",
   "name": "FEX for the x86-64 Steam client",
-  "version": "2611-r16",
+  "version": "2611-r17",
   "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/fex/fex.tzst",
-  "sha256": "58be7c822ad001984bdd97a9f6f9ce5e32f7f29dcd0c2ef217b33c823256dac0",
-  "size": 4124357,
-  "file_size": 4124357,
-  "note": "FEX built for the Linux runtime from tools/fex of Droid-Deck/DroidDeck afe81ea69fffd624f95c09b9d2a01bb0efa6abeb by build-fex.yml (host thunks, libraries the runtime lacks bundled). The app reads this file and installs the build only once its archive matches this sha256 and its programs load; the archive on the fex release is replaced with each build.",
+  "sha256": "453714b5e6574ee1f8ff40f9ee7ca29a052150096533c6588dff62ac195d3d03",
+  "size": 4132625,
+  "file_size": 4132625,
+  "note": "FEX built for the Linux runtime from tools/fex of Droid-Deck/DroidDeck 96e4bd4eab03dee81d21b27eaed3a93858050dbd by build-fex.yml (host thunks, libraries the runtime lacks bundled). The app reads this file and installs the build only once its archive matches this sha256 and its programs load; the archive on the fex release is replaced with each build.",
   "fex": "FEX-2611.1",
-  "source": "afe81ea69fffd624f95c09b9d2a01bb0efa6abeb"
+  "source": "96e4bd4eab03dee81d21b27eaed3a93858050dbd"
 }
