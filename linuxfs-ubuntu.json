@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "category": "linux-runtime",
-  "release": "ubuntu-r1-rc5",
+  "release": "ubuntu-r1-rc6",
   "name": "Linux runtime (Ubuntu 26.04 LTS)",
-  "version": "ubuntu-r1-rc5",
-  "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/ubuntu-r1-rc5/ubuntu-r1-rc5.tar.zst",
-  "sha256": "434d3d91f9c93d94deebbbdc57a1b3763443f785925393f15db19feed477e030",
-  "size": 291553163,
-  "file_size": 291553163,
-  "note": "Ubuntu 26.04 LTS arm64 runtime for DroidDeck, built by tools/ubuntu in Droid-Deck/DroidDeck (PR #1733); rc2 adds libxcb-keysyms1 so the DD-Turnip driver loads (PR #1773); rc3 adds libva-drm2 and libva-x11-2 so Proton's media decoder loads and game cutscenes play (PR #1823); rc4 adds liblzo2-2 so FEX's unsquashfs runs and the x86-64 Steam client starts (PR #1825); rc5 carries Mesa's Zink fix so PowerVR GPUs keep colour textures in colour (PR #2287). Its Kubuntu Plasma desktop pack is ubuntu-r1-rc5-desktop.tar.zst in the same release, named inside the runtime at usr/share/droiddeck/desktop-pack.json. Release candidate: only test builds of PR #1733 read this file."
+  "version": "ubuntu-r1-rc6",
+  "url": "https://github.com/Droid-Deck/DroidDeck-Components/releases/download/ubuntu-r1-rc6/ubuntu-r1-rc6.tar.zst",
+  "sha256": "5da0e09deb17251b8e3429a4f92b1e3a0db082ffeddea11535e0e63e0a23ca25",
+  "size": 291885807,
+  "file_size": 291885807,
+  "note": "Ubuntu 26.04 LTS arm64 runtime for DroidDeck, built by tools/ubuntu in Droid-Deck/DroidDeck (PR #1733); rc2 adds libxcb-keysyms1 so the DD-Turnip driver loads (PR #1773); rc3 adds libva-drm2 and libva-x11-2 so Proton's media decoder loads and game cutscenes play (PR #1823); rc4 adds liblzo2-2 so FEX's unsquashfs runs and the x86-64 Steam client starts (PR #1825); rc5 carries Mesa's Zink fix so PowerVR GPUs keep colour textures in colour (PR #2287); rc6 makes Zink give back the memory an idle client freed, so Steam's UI behind a game holds about 250 MiB less (PR #3320), refreshes every slot sharing a rebuilt sampler view (PR #2178), and carries the desktop fixes from PRs #3151, #3173 and #3231. Its Kubuntu Plasma desktop pack is ubuntu-r1-rc6-desktop.tar.zst in the same release, named inside the runtime at usr/share/droiddeck/desktop-pack.json. Release candidate: only test builds of PR #1733 read this file."
 }
